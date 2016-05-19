@@ -36,7 +36,7 @@ public class FriendFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (RongIM.getInstance()!=null){
-                    RongIM.getInstance().startPrivateChat(getActivity(),"001","私人聊天");
+                    RongIM.getInstance().startPrivateChat(getActivity(),"002","私人聊天");
                 }
             }
         });

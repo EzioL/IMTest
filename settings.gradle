@@ -1,1 +1,1 @@
-include ':app', ':IMKit', ':test1'
+include ':app', ':IMKit', ':test1', ':test2'

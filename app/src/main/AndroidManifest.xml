@@ -105,10 +105,11 @@
 
         <meta-data
             android:name="RONG_CLOUD_APP_KEY"
-            android:value="c9kqb3rdkly0j"/>
+            android:value="pwe86ga5eb2r6"/>
 
         <activity android:name=".HomeActivity">
         </activity>
+
         <activity android:name=".StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
