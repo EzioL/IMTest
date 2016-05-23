@@ -1,5 +1,6 @@
 package com.ezio.imtest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import io.rong.imkit.RongIM;
 public class FriendFragment extends Fragment {
 
     public  static FriendFragment instance = null;
+
     public static FriendFragment getInstance() {
         if (instance == null){
             instance = new FriendFragment();
@@ -35,9 +37,7 @@ public class FriendFragment extends Fragment {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (RongIM.getInstance()!=null){
-                    RongIM.getInstance().startPrivateChat(getActivity(),"002","私人聊天");
-                }
+               getActivity().startActivity(new Intent(getActivity(),Main2Activity.class));
             }
         });
 

@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
+import beans.User;
 import io.rong.imkit.RongIM;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.UserInfo;
@@ -24,21 +25,22 @@ public class StartActivity extends AppCompatActivity implements RongIM.UserInfoP
     private EditText password;
     String token;
     String test = "JQaMtKv6gQNpnJmj8ZwikCPwvh9fGjOCCQyxHfOT2K+9GwQv+mkeQhV8xyGKBfyk7BQnHGQeCzdAWlzNBGFDjw==";
-
-    String loginurl = "http://10.40.7.21:8080/IMTest/LoginServlet";
-    String regurl = "http://10.40.7.21:8080/IMTest/RegServlet";
-    String username;
+    String loginurl = "http://10.201.1.185:8080/IMTest/LoginServlet";
+    String regurl = "http://10.201.1.185:8080/IMTest/RegServlet";
+    String userid;
     String pass;
-    Data data;
+    User user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         initViews();
-        //connect(test);
-
-
         RongIM.setUserInfoProvider(this, true);
+
+
+
+
     }
 
     private void initViews() {
@@ -47,73 +49,26 @@ public class StartActivity extends AppCompatActivity implements RongIM.UserInfoP
     }
 
     public void login(View view) {
-        username = userId.getText().toString();
+        userid = userId.getText().toString();
         pass = password.getText().toString();
-        getLogin(username, pass);
+        getLogin(userid, pass);
     }
 
-    private void getLogin(String username, String pass) {
-        OkHttpUtils
-                .get()
-                .url(loginurl)
-                .addParams("username", username)
-                .addParams("password", pass)
-                .build()
-                .execute(new StringCallback() {
-                    @Override
-                    public void onError(Call call, Exception e) {
-                    }
-
-                    @Override
-                    public void onResponse(String response) {
-                        if (response.equals("false")) {
-                            Toast.makeText(StartActivity.this, "用户名或密码错误", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Log.e("12345: ", response);
-                            data = new Gson().fromJson(response, Data.class);
-                            token = data.getToken();
-                            Log.e("12345: ", token);
-                            connect(token);
-
-
-                        }
-
-                    }
-                });
+    private void getLogin(String userid, String pass) {
+        //设置偏好设置或者从数据库中验证
+        //这里m欸次都从数据库中获取验证
+        request(loginurl,userid, pass);
     }
 
     public void registered(View view) {
-        username = userId.getText().toString();
+        userid = userId.getText().toString();
         pass = password.getText().toString();
-        getToken(username, pass);
+        getToken(userid, pass);
     }
 
-    private void getToken(String username, String password) {
-        OkHttpUtils
-                .get()
-                .url(regurl)
-                .addParams("username", username)
-                .addParams("password", password)
-                .build()
-                .execute(new StringCallback() {
-                    @Override
-                    public void onError(Call call, Exception e) {
-                    }
+    private void getToken(String userid, String password) {
 
-                    @Override
-                    public void onResponse(String response) {
-                        if (response.equals("false")) {
-                            Toast.makeText(StartActivity.this, "用户名已经存在", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Log.e("12345: ", response);
-                            data = new Gson().fromJson(response, Data.class);
-                            token = data.getToken();
-                            Log.e("12345: ", token);
-                            connect(token);
-
-                        }
-                    }
-                });
+        request(regurl,userid, pass);
     }
 
     //融云的连接
@@ -128,6 +83,7 @@ public class StartActivity extends AppCompatActivity implements RongIM.UserInfoP
             @Override
             public void onSuccess(String s) {
                 Log.e("12345: ", "成功");
+                App.sourceUserId = s;
                 startActivity(new Intent(StartActivity.this, HomeActivity.class));
             }
 
@@ -138,15 +94,43 @@ public class StartActivity extends AppCompatActivity implements RongIM.UserInfoP
         });
     }
 
+    private void request(String url,String userid, String pass) {
+        OkHttpUtils
+                .get()
+                .url(url)
+                .addParams("userid", userid)
+                .addParams("password", pass)
+                .build()
+                .execute(new StringCallback() {
+                    @Override
+                    public void onError(Call call, Exception e) {
+                    }
 
+                    @Override
+                    public void onResponse(String response) {
+                        if (response.equals("login"+false)) {
+                            Toast.makeText(StartActivity.this, "用户名或密码错误", Toast.LENGTH_SHORT).show();
+                        }else if (response.equals("reg"+false)){
+                            Toast.makeText(StartActivity.this, "用户名已经存在", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.e("12345: ", response);
+                            user = new Gson().fromJson(response, User.class);
+                            token = user.getToken();
+                            Log.e("12345: ", token);
+                            connect(token);
+                        }
+
+                    }
+                });
+    }
     @Override
     public UserInfo getUserInfo(String s) {
 
-        UserInfo userInfo = new UserInfo(data.getUserId(), "run"+data.getUserId(),
-                Uri.parse("http://img2.duitang.com/uploads/item/201207/24/20120724123200_x85tj.jpeg"));
-
+        UserInfo userInfo = new UserInfo(user.getUserId(), user.getUserName(),
+                Uri.parse(user.getPortraitUri()));
+        RongIM.getInstance().setCurrentUserInfo(userInfo);
+        RongIM.getInstance().setMessageAttachedUserInfo(true);
         return userInfo;
-
 
     }
 }
